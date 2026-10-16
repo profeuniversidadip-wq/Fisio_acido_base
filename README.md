@@ -51,3 +51,9 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Diseño 4 canales en PC y 2x2 en móvil.
 - Colores diferenciados por variable.
 - Resultado ácido-base integrado inmediatamente bajo el panel.
+
+## Mejora v7
+- Faders verticales más finos y móviles directamente con mouse o dedo.
+- Se eliminan los controles inferiores.
+- Cada parámetro muestra su condición justo debajo.
+- Resumen ácido-base más pequeño e inmediatamente bajo el panel, para evitar desplazamiento vertical.

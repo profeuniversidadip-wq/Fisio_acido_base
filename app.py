@@ -212,215 +212,342 @@ with tab1:
 
 with tab2:
     st.subheader("Simulador dinámico")
-    st.caption("Mueve los faders verticales como en una mesa de sonido y observa el efecto fisiológico.")
+    st.caption("Panel interactivo tipo mesa de sonido. Los propios faders son móviles; no necesitas controles debajo.")
 
-    # Estado persistente inicial
-    if "vent_val" not in st.session_state:
-        st.session_state.vent_val = 100
-    if "pco2_val" not in st.session_state:
-        st.session_state.pco2_val = 40
-    if "hco3_val" not in st.session_state:
-        st.session_state.hco3_val = 24
-    if "renal_val" not in st.session_state:
-        st.session_state.renal_val = 100
-
-    # Faders HTML visuales; los valores se seleccionan con controles compactos debajo
-    fader_html = f"""
+    mixer_html = """
     <style>
-      .mixer {{
-        display:grid;
-        grid-template-columns:repeat(4,minmax(110px,1fr));
-        gap:14px;
-        background:#1f2937;
-        padding:18px;
+      .ab-wrap{
+        font-family: Arial, Helvetica, sans-serif;
+        border:1px solid #d8e0e8;
         border-radius:18px;
-        border:1px solid #374151;
-      }}
-      .channel {{
-        background:#111827;
-        border-radius:14px;
-        padding:12px 10px 14px;
+        padding:14px 14px 10px;
+        background:linear-gradient(180deg,#f8fbff 0%, #eef5fb 100%);
+      }
+      .ab-grid{
+        display:grid;
+        grid-template-columns:repeat(4, minmax(95px,1fr));
+        gap:12px;
+        align-items:start;
+      }
+      .ab-channel{
+        background:#14202b;
+        border-radius:16px;
+        padding:10px 8px 12px;
         text-align:center;
-        border:1px solid #374151;
-      }}
-      .label {{
         color:white;
+        box-shadow:0 3px 10px rgba(0,0,0,.12);
+      }
+      .ab-label{
+        font-size:13px;
         font-weight:700;
-        font-size:14px;
-        margin-bottom:6px;
-      }}
-      .value {{
-        font-size:18px;
+        line-height:1.15;
+        min-height:30px;
+        margin-bottom:4px;
+      }
+      .ab-value{
+        font-size:15px;
         font-weight:800;
         margin-bottom:8px;
-      }}
-      .track {{
-        position:relative;
-        height:190px;
-        width:26px;
-        background:linear-gradient(to top,#4b5563,#9ca3af);
-        border-radius:8px;
-        margin:0 auto 8px;
-        box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);
-      }}
-      .scale {{
-        position:absolute;
-        left:34px;
-        top:0;
-        bottom:0;
-        width:28px;
-        color:#cbd5e1;
-        font-size:10px;
+      }
+      .slider-box{
+        height:200px;
         display:flex;
-        flex-direction:column;
-        justify-content:space-between;
-      }}
-      .knob {{
-        position:absolute;
-        left:-10px;
-        width:46px;
-        height:18px;
-        border-radius:5px;
+        align-items:center;
+        justify-content:center;
+        margin:0 auto 6px;
+      }
+      input[type=range].vslider{
+        -webkit-appearance:none;
+        appearance:none;
+        width:180px;
+        height:14px;
+        transform:rotate(-90deg);
+        background:transparent;
+      }
+      input[type=range].vslider::-webkit-slider-runnable-track{
+        height:10px;
+        border-radius:999px;
+        background:linear-gradient(90deg,#4b5563 0%, #9ca3af 100%);
+      }
+      input[type=range].vslider::-webkit-slider-thumb{
+        -webkit-appearance:none;
+        appearance:none;
+        width:18px;
+        height:30px;
+        border-radius:6px;
         background:#f8fafc;
         border:2px solid #111827;
-        box-shadow:0 2px 6px rgba(0,0,0,.4);
-      }}
-      .blue {{ color:#60a5fa; }}
-      .red {{ color:#fb7185; }}
-      .green {{ color:#4ade80; }}
-      .orange {{ color:#fbbf24; }}
-      @media(max-width:700px) {{
-        .mixer {{grid-template-columns:repeat(2,minmax(120px,1fr));}}
-        .track {{height:160px;}}
-      }}
+        margin-top:-10px;
+        box-shadow:0 2px 4px rgba(0,0,0,.28);
+        cursor:pointer;
+      }
+      input[type=range].vslider::-moz-range-track{
+        height:10px;
+        border-radius:999px;
+        background:linear-gradient(90deg,#4b5563 0%, #9ca3af 100%);
+      }
+      input[type=range].vslider::-moz-range-thumb{
+        width:18px;
+        height:30px;
+        border-radius:6px;
+        background:#f8fafc;
+        border:2px solid #111827;
+        box-shadow:0 2px 4px rgba(0,0,0,.28);
+        cursor:pointer;
+      }
+      .scale{
+        display:flex;
+        justify-content:space-between;
+        color:#cbd5e1;
+        font-size:10px;
+        margin-top:-3px;
+      }
+      .mini-status{
+        margin-top:8px;
+        border-radius:10px;
+        padding:6px 8px;
+        font-size:11px;
+        font-weight:700;
+        line-height:1.2;
+        min-height:34px;
+      }
+      .mini-normal{background:#e8f5e9;color:#1b5e20;}
+      .mini-acid{background:#ffebee;color:#b71c1c;}
+      .mini-alk{background:#e3f2fd;color:#0d47a1;}
+      .mini-warn{background:#fff8e1;color:#8d6e00;}
+
+      .summary{
+        margin-top:10px;
+        border-radius:12px;
+        padding:8px 11px;
+        border:1px solid rgba(80,110,140,.20);
+        font-size:13px;
+        font-weight:700;
+      }
+      .summary .title{
+        font-size:15px;
+        font-weight:800;
+        margin-bottom:2px;
+      }
+      .sum-normal{background:#e8f5e9;color:#1b5e20;}
+      .sum-acid{background:#ffebee;color:#b71c1c;}
+      .sum-alk{background:#e3f2fd;color:#0d47a1;}
+      .sum-warn{background:#fff8e1;color:#8d6e00;}
+
+      .details{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+        margin-top:10px;
+      }
+      .detail-card{
+        border-radius:10px;
+        padding:7px 9px;
+        font-size:12px;
+        line-height:1.2;
+        border:1px solid rgba(80,110,140,.14);
+      }
+      .equation{
+        text-align:center;
+        font-weight:800;
+        font-size:14px;
+        margin-top:10px;
+        padding:8px;
+        border-radius:10px;
+        background:#ffffff;
+        border:1px solid rgba(80,110,140,.15);
+      }
+      .note{
+        text-align:center;
+        font-size:11px;
+        color:#475569;
+        margin-top:6px;
+      }
+      .blue{color:#60a5fa;}
+      .pink{color:#fb7185;}
+      .green{color:#4ade80;}
+      .orange{color:#fbbf24;}
+
+      @media(max-width:700px){
+        .ab-grid{grid-template-columns:repeat(2,minmax(120px,1fr));}
+        .slider-box{height:165px;}
+        input[type=range].vslider{width:145px;}
+        .details{grid-template-columns:1fr;}
+      }
     </style>
 
-    <div class="mixer">
-      <div class="channel">
-        <div class="label">Ventilación</div>
-        <div class="value blue">{st.session_state.vent_val}%</div>
-        <div class="track">
-          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.vent_val-25)/(200-25)*100))}%;"></div>
-          <div class="scale"><span>200</span><span>100</span><span>25</span></div>
+    <div class="ab-wrap">
+      <div class="ab-grid">
+        <div class="ab-channel">
+          <div class="ab-label">Ventilación</div>
+          <div id="ventVal" class="ab-value blue">100%</div>
+          <div class="slider-box">
+            <input id="vent" class="vslider" type="range" min="25" max="200" step="5" value="100">
+          </div>
+          <div class="scale"><span>25</span><span>100</span><span>200</span></div>
+          <div id="ventStatus" class="mini-status mini-normal">Cercana a referencia</div>
+        </div>
+
+        <div class="ab-channel">
+          <div class="ab-label">PCO₂</div>
+          <div id="pco2Val" class="ab-value pink">40 mmHg</div>
+          <div class="slider-box">
+            <input id="pco2" class="vslider" type="range" min="20" max="70" step="1" value="40">
+          </div>
+          <div class="scale"><span>20</span><span>45</span><span>70</span></div>
+          <div id="pco2Status" class="mini-status mini-normal">En rango</div>
+        </div>
+
+        <div class="ab-channel">
+          <div class="ab-label">HCO₃⁻</div>
+          <div id="hco3Val" class="ab-value green">24 mEq/L</div>
+          <div class="slider-box">
+            <input id="hco3" class="vslider" type="range" min="10" max="40" step="1" value="24">
+          </div>
+          <div class="scale"><span>10</span><span>24</span><span>40</span></div>
+          <div id="hco3Status" class="mini-status mini-normal">En rango</div>
+        </div>
+
+        <div class="ab-channel">
+          <div class="ab-label">Excreción renal H⁺</div>
+          <div id="renalVal" class="ab-value orange">100%</div>
+          <div class="slider-box">
+            <input id="renal" class="vslider" type="range" min="25" max="200" step="5" value="100">
+          </div>
+          <div class="scale"><span>25</span><span>100</span><span>200</span></div>
+          <div id="renalStatus" class="mini-status mini-normal">Cercana a referencia</div>
         </div>
       </div>
 
-      <div class="channel">
-        <div class="label">PCO₂</div>
-        <div class="value red">{st.session_state.pco2_val} mmHg</div>
-        <div class="track">
-          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.pco2_val-20)/(70-20)*100))}%;"></div>
-          <div class="scale"><span>70</span><span>45</span><span>20</span></div>
-        </div>
+      <div id="summary" class="summary sum-normal">
+        <div class="title">Condición cercana a referencia</div>
+        <div id="summaryText">Sin predominio acidificante ni alcalinizante.</div>
       </div>
 
-      <div class="channel">
-        <div class="label">HCO₃⁻</div>
-        <div class="value green">{st.session_state.hco3_val} mEq/L</div>
-        <div class="track">
-          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.hco3_val-10)/(40-10)*100))}%;"></div>
-          <div class="scale"><span>40</span><span>24</span><span>10</span></div>
-        </div>
+      <div class="details">
+        <div id="leftDetail1" class="detail-card" style="background:#ffffff;">PCO₂ en rango · 35–45 mmHg</div>
+        <div id="rightDetail1" class="detail-card" style="background:#ffffff;">HCO₃⁻ en rango · 22–26 mEq/L</div>
+        <div id="leftDetail2" class="detail-card" style="background:#ffffff;">Ventilación cercana a referencia</div>
+        <div id="rightDetail2" class="detail-card" style="background:#ffffff;">Excreción renal cercana a referencia</div>
       </div>
 
-      <div class="channel">
-        <div class="label">Excreción H⁺</div>
-        <div class="value orange">{st.session_state.renal_val}%</div>
-        <div class="track">
-          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.renal_val-25)/(200-25)*100))}%;"></div>
-          <div class="scale"><span>200</span><span>100</span><span>25</span></div>
-        </div>
-      </div>
+      <div class="equation">CO₂ + H₂O ⇄ H₂CO₃ ⇄ H⁺ + HCO₃⁻</div>
+      <div class="note">Simulación cualitativa educativa. No calcula compensaciones esperadas cuantitativamente.</div>
     </div>
+
+    <script>
+      const vent = document.getElementById('vent');
+      const pco2 = document.getElementById('pco2');
+      const hco3 = document.getElementById('hco3');
+      const renal = document.getElementById('renal');
+
+      const setBox = (el, text, cls) => {
+        el.className = 'mini-status ' + cls;
+        el.textContent = text;
+      };
+      const setDetail = (id, text, bg) => {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.style.background = bg;
+      };
+
+      function updateMixer(){
+        const v = Number(vent.value);
+        const p = Number(pco2.value);
+        const h = Number(hco3.value);
+        const r = Number(renal.value);
+
+        document.getElementById('ventVal').textContent = v + '%';
+        document.getElementById('pco2Val').textContent = p + ' mmHg';
+        document.getElementById('hco3Val').textContent = h + ' mEq/L';
+        document.getElementById('renalVal').textContent = r + '%';
+
+        let acidScore = 0;
+        let alkScore = 0;
+
+        // PCO2
+        if (p > 45){
+          acidScore += 2;
+          setBox(document.getElementById('pco2Status'), 'Alta', 'mini-acid');
+          setDetail('leftDetail1', 'PCO₂ alta → ↑ CO₂ → ↑ H⁺ → ↓ pH', '#ffebee');
+        } else if (p < 35){
+          alkScore += 2;
+          setBox(document.getElementById('pco2Status'), 'Baja', 'mini-alk');
+          setDetail('leftDetail1', 'PCO₂ baja → ↓ CO₂ → ↓ H⁺ → ↑ pH', '#e3f2fd');
+        } else {
+          setBox(document.getElementById('pco2Status'), 'En rango', 'mini-normal');
+          setDetail('leftDetail1', 'PCO₂ en rango · 35–45 mmHg', '#ffffff');
+        }
+
+        // HCO3
+        if (h < 22){
+          acidScore += 2;
+          setBox(document.getElementById('hco3Status'), 'Bajo', 'mini-acid');
+          setDetail('rightDetail1', 'HCO₃⁻ bajo → menor base → tendencia a ↓ pH', '#ffebee');
+        } else if (h > 26){
+          alkScore += 2;
+          setBox(document.getElementById('hco3Status'), 'Alto', 'mini-alk');
+          setDetail('rightDetail1', 'HCO₃⁻ alto → mayor base → tendencia a ↑ pH', '#e3f2fd');
+        } else {
+          setBox(document.getElementById('hco3Status'), 'En rango', 'mini-normal');
+          setDetail('rightDetail1', 'HCO₃⁻ en rango · 22–26 mEq/L', '#ffffff');
+        }
+
+        // Ventilation
+        if (v < 80){
+          acidScore += 1;
+          setBox(document.getElementById('ventStatus'), 'Hipoventilación', 'mini-acid');
+          setDetail('leftDetail2', '↓ ventilación → ↓ eliminación de CO₂ → ↓ pH', '#ffebee');
+        } else if (v > 120){
+          alkScore += 1;
+          setBox(document.getElementById('ventStatus'), 'Hiperventilación', 'mini-alk');
+          setDetail('leftDetail2', '↑ ventilación → ↑ eliminación de CO₂ → ↑ pH', '#e3f2fd');
+        } else {
+          setBox(document.getElementById('ventStatus'), 'Cercana a referencia', 'mini-normal');
+          setDetail('leftDetail2', 'Ventilación cercana a referencia', '#ffffff');
+        }
+
+        // Renal H+
+        if (r < 80){
+          acidScore += 1;
+          setBox(document.getElementById('renalStatus'), 'Menor excreción', 'mini-acid');
+          setDetail('rightDetail2', '↓ excreción renal de H⁺ → retención relativa de ácido', '#ffebee');
+        } else if (r > 120){
+          alkScore += 1;
+          setBox(document.getElementById('renalStatus'), 'Mayor excreción', 'mini-alk');
+          setDetail('rightDetail2', '↑ excreción renal de H⁺ → menor carga ácida', '#e3f2fd');
+        } else {
+          setBox(document.getElementById('renalStatus'), 'Cercana a referencia', 'mini-normal');
+          setDetail('rightDetail2', 'Excreción renal cercana a referencia', '#ffffff');
+        }
+
+        const sum = document.getElementById('summary');
+        const sumText = document.getElementById('summaryText');
+
+        if (acidScore === 0 && alkScore === 0){
+          sum.className = 'summary sum-normal';
+          sum.querySelector('.title').textContent = 'Condición cercana a referencia';
+          sumText.textContent = 'Sin predominio acidificante ni alcalinizante.';
+        } else if (acidScore > alkScore){
+          sum.className = 'summary sum-acid';
+          sum.querySelector('.title').textContent = 'Predominio acidificante';
+          sumText.textContent = 'Las variables favorecen ↑ H⁺ y tendencia a ↓ pH.';
+        } else if (alkScore > acidScore){
+          sum.className = 'summary sum-alk';
+          sum.querySelector('.title').textContent = 'Predominio alcalinizante';
+          sumText.textContent = 'Las variables favorecen ↓ H⁺ y tendencia a ↑ pH.';
+        } else {
+          sum.className = 'summary sum-warn';
+          sum.querySelector('.title').textContent = 'Fuerzas opuestas';
+          sumText.textContent = 'Puede existir compensación o un patrón mixto; integra pH, PCO₂ y HCO₃⁻.';
+        }
+      }
+
+      [vent,pco2,hco3,renal].forEach(el => el.addEventListener('input', updateMixer));
+      updateMixer();
+    </script>
     """
-    components.html(fader_html, height=315, scrolling=False)
-
-    st.markdown('<div class="fader-panel-note">Ajusta los valores con los controles debajo. El panel superior cambia inmediatamente.</div>', unsafe_allow_html=True)
-
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.session_state.vent_val = st.slider("Ventilación (%)", 25, 200, st.session_state.vent_val, 5, key="vent_slider")
-    with c2:
-        st.session_state.pco2_val = st.slider("PCO₂", 20, 70, st.session_state.pco2_val, 1, key="pco2_slider")
-    with c3:
-        st.session_state.hco3_val = st.slider("HCO₃⁻", 10, 40, st.session_state.hco3_val, 1, key="hco3_slider")
-    with c4:
-        st.session_state.renal_val = st.slider("Excreción H⁺ (%)", 25, 200, st.session_state.renal_val, 5, key="renal_slider")
-
-    ventilacion = st.session_state.vent_val
-    pco2 = st.session_state.pco2_val
-    hco3 = st.session_state.hco3_val
-    excrecion_h = st.session_state.renal_val
-
-    acid_score = 0
-    alk_score = 0
-    if pco2 > 45: acid_score += 2
-    elif pco2 < 35: alk_score += 2
-    if hco3 < 22: acid_score += 2
-    elif hco3 > 26: alk_score += 2
-    if ventilacion < 80: acid_score += 1
-    elif ventilacion > 120: alk_score += 1
-    if excrecion_h < 80: acid_score += 1
-    elif excrecion_h > 120: alk_score += 1
-
-    if acid_score == 0 and alk_score == 0:
-        global_txt = "Condición cercana a referencia"
-        global_cls = "summary-normal"
-        global_msg = "Sin predominio acidificante ni alcalinizante."
-    elif acid_score > alk_score:
-        global_txt = "Predominio acidificante"
-        global_cls = "summary-acid"
-        global_msg = "Las variables favorecen ↑ H⁺ y tendencia a ↓ pH."
-    elif alk_score > acid_score:
-        global_txt = "Predominio alcalinizante"
-        global_cls = "summary-alk"
-        global_msg = "Las variables favorecen ↓ H⁺ y tendencia a ↑ pH."
-    else:
-        global_txt = "Fuerzas opuestas"
-        global_cls = "summary-warn"
-        global_msg = "Puede existir compensación o un patrón mixto; integra pH, PCO₂ y HCO₃⁻."
-
-    st.markdown(
-        f'<div class="summary-state {global_cls}">'
-        f'<div class="summary-title">{global_txt}</div>'
-        f'<div class="summary-mini">{global_msg}</div>'
-        f'</div>',
-        unsafe_allow_html=True
-    )
-
-    r1, r2 = st.columns(2)
-    with r1:
-        if pco2 > 45:
-            st.markdown('<div class="status-card status-acid"><div class="big-state">PCO₂ alta</div><div>↑ CO₂ → ↑ H⁺ → ↓ pH</div></div>', unsafe_allow_html=True)
-        elif pco2 < 35:
-            st.markdown('<div class="status-card status-alk"><div class="big-state">PCO₂ baja</div><div>↓ CO₂ → ↓ H⁺ → ↑ pH</div></div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="status-card status-normal"><div class="big-state">PCO₂ en rango</div><div>35–45 mmHg</div></div>', unsafe_allow_html=True)
-
-        if ventilacion < 80:
-            st.markdown('<div class="status-card status-acid"><div class="big-state">Hipoventilación relativa</div><div>↓ ventilación → ↑ CO₂ → ↓ pH</div></div>', unsafe_allow_html=True)
-        elif ventilacion > 120:
-            st.markdown('<div class="status-card status-alk"><div class="big-state">Hiperventilación relativa</div><div>↑ ventilación → ↓ CO₂ → ↑ pH</div></div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="status-card status-normal"><div class="big-state">Ventilación cercana a referencia</div></div>', unsafe_allow_html=True)
-
-    with r2:
-        if hco3 < 22:
-            st.markdown('<div class="status-card status-acid"><div class="big-state">HCO₃⁻ bajo</div><div>Menor base disponible → tendencia a ↓ pH</div></div>', unsafe_allow_html=True)
-        elif hco3 > 26:
-            st.markdown('<div class="status-card status-alk"><div class="big-state">HCO₃⁻ alto</div><div>Mayor componente básico → tendencia a ↑ pH</div></div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="status-card status-normal"><div class="big-state">HCO₃⁻ en rango</div><div>22–26 mEq/L</div></div>', unsafe_allow_html=True)
-
-        if excrecion_h < 80:
-            st.markdown('<div class="status-card status-acid"><div class="big-state">Menor excreción renal de H⁺</div><div>Retención relativa de ácido → ↓ pH</div></div>', unsafe_allow_html=True)
-        elif excrecion_h > 120:
-            st.markdown('<div class="status-card status-alk"><div class="big-state">Mayor excreción renal de H⁺</div><div>Menor carga ácida → ↑ pH</div></div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="status-card status-normal"><div class="big-state">Excreción renal cercana a referencia</div></div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="flow-box">CO₂ + H₂O ⇄ H₂CO₃ ⇄ H⁺ + HCO₃⁻</div>', unsafe_allow_html=True)
-    st.caption("Simulación cualitativa educativa. No calcula compensaciones esperadas cuantitativamente.")
+    components.html(mixer_html, height=560, scrolling=False)
 
 with tab3:
     st.subheader("Interpretación guiada de gasometría")
