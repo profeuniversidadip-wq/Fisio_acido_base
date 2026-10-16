@@ -45,3 +45,9 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Tanda 3: casos clínicos.
 - Cada respuesta muestra una explicación breve del mecanismo.
 - Navegación por ventanas con identificación de color.
+
+## Mejora v6
+- Panel de faders verticales tipo mesa de sonido.
+- Diseño 4 canales en PC y 2x2 en móvil.
+- Colores diferenciados por variable.
+- Resultado ácido-base integrado inmediatamente bajo el panel.

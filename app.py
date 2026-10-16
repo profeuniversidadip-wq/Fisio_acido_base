@@ -1,5 +1,6 @@
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="FisioÁcidoBase IA",
@@ -148,6 +149,25 @@ html, body, [class*="css"] {font-size: 17px;}
 .dot-blue {background:#1E88E5;}
 .dot-green {background:#43A047;}
 .dot-orange {background:#FB8C00;}
+
+.nav-card {
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-weight: 800;
+    text-align: center;
+    border: 1px solid rgba(80,110,140,.22);
+    margin-bottom: .4rem;
+}
+.nav-blue {background:#E3F2FD;}
+.nav-green {background:#E8F5E9;}
+.nav-orange {background:#FFF3E0;}
+.nav-purple {background:#F3E5F5;}
+.fader-panel-note {
+    font-size:.9rem;
+    opacity:.8;
+    margin-top:.25rem;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -192,40 +212,157 @@ with tab1:
 
 with tab2:
     st.subheader("Simulador dinámico")
-    st.caption("Mueve los faders y observa de inmediato la tendencia ácido-base.")
+    st.caption("Mueve los faders verticales como en una mesa de sonido y observa el efecto fisiológico.")
 
-    # Controles compactos
-    c1, c2 = st.columns(2)
+    # Estado persistente inicial
+    if "vent_val" not in st.session_state:
+        st.session_state.vent_val = 100
+    if "pco2_val" not in st.session_state:
+        st.session_state.pco2_val = 40
+    if "hco3_val" not in st.session_state:
+        st.session_state.hco3_val = 24
+    if "renal_val" not in st.session_state:
+        st.session_state.renal_val = 100
+
+    # Faders HTML visuales; los valores se seleccionan con controles compactos debajo
+    fader_html = f"""
+    <style>
+      .mixer {{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(110px,1fr));
+        gap:14px;
+        background:#1f2937;
+        padding:18px;
+        border-radius:18px;
+        border:1px solid #374151;
+      }}
+      .channel {{
+        background:#111827;
+        border-radius:14px;
+        padding:12px 10px 14px;
+        text-align:center;
+        border:1px solid #374151;
+      }}
+      .label {{
+        color:white;
+        font-weight:700;
+        font-size:14px;
+        margin-bottom:6px;
+      }}
+      .value {{
+        font-size:18px;
+        font-weight:800;
+        margin-bottom:8px;
+      }}
+      .track {{
+        position:relative;
+        height:190px;
+        width:26px;
+        background:linear-gradient(to top,#4b5563,#9ca3af);
+        border-radius:8px;
+        margin:0 auto 8px;
+        box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);
+      }}
+      .scale {{
+        position:absolute;
+        left:34px;
+        top:0;
+        bottom:0;
+        width:28px;
+        color:#cbd5e1;
+        font-size:10px;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+      }}
+      .knob {{
+        position:absolute;
+        left:-10px;
+        width:46px;
+        height:18px;
+        border-radius:5px;
+        background:#f8fafc;
+        border:2px solid #111827;
+        box-shadow:0 2px 6px rgba(0,0,0,.4);
+      }}
+      .blue {{ color:#60a5fa; }}
+      .red {{ color:#fb7185; }}
+      .green {{ color:#4ade80; }}
+      .orange {{ color:#fbbf24; }}
+      @media(max-width:700px) {{
+        .mixer {{grid-template-columns:repeat(2,minmax(120px,1fr));}}
+        .track {{height:160px;}}
+      }}
+    </style>
+
+    <div class="mixer">
+      <div class="channel">
+        <div class="label">Ventilación</div>
+        <div class="value blue">{st.session_state.vent_val}%</div>
+        <div class="track">
+          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.vent_val-25)/(200-25)*100))}%;"></div>
+          <div class="scale"><span>200</span><span>100</span><span>25</span></div>
+        </div>
+      </div>
+
+      <div class="channel">
+        <div class="label">PCO₂</div>
+        <div class="value red">{st.session_state.pco2_val} mmHg</div>
+        <div class="track">
+          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.pco2_val-20)/(70-20)*100))}%;"></div>
+          <div class="scale"><span>70</span><span>45</span><span>20</span></div>
+        </div>
+      </div>
+
+      <div class="channel">
+        <div class="label">HCO₃⁻</div>
+        <div class="value green">{st.session_state.hco3_val} mEq/L</div>
+        <div class="track">
+          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.hco3_val-10)/(40-10)*100))}%;"></div>
+          <div class="scale"><span>40</span><span>24</span><span>10</span></div>
+        </div>
+      </div>
+
+      <div class="channel">
+        <div class="label">Excreción H⁺</div>
+        <div class="value orange">{st.session_state.renal_val}%</div>
+        <div class="track">
+          <div class="knob" style="bottom:{max(0,min(100,(st.session_state.renal_val-25)/(200-25)*100))}%;"></div>
+          <div class="scale"><span>200</span><span>100</span><span>25</span></div>
+        </div>
+      </div>
+    </div>
+    """
+    components.html(fader_html, height=315, scrolling=False)
+
+    st.markdown('<div class="fader-panel-note">Ajusta los valores con los controles debajo. El panel superior cambia inmediatamente.</div>', unsafe_allow_html=True)
+
+    c1, c2, c3, c4 = st.columns(4)
     with c1:
-        pco2 = st.slider("PCO₂ (mmHg)", 20, 70, 40, 1)
-        ventilacion = st.slider(
-            "Ventilación relativa (%)", 25, 200, 100, 5,
-            help="100% representa una condición de referencia conceptual."
-        )
+        st.session_state.vent_val = st.slider("Ventilación (%)", 25, 200, st.session_state.vent_val, 5, key="vent_slider")
     with c2:
-        hco3 = st.slider("HCO₃⁻ (mEq/L)", 10, 40, 24, 1)
-        excrecion_h = st.slider(
-            "Excreción renal H⁺ (%)", 25, 200, 100, 5,
-            help="100% representa una condición de referencia conceptual."
-        )
+        st.session_state.pco2_val = st.slider("PCO₂", 20, 70, st.session_state.pco2_val, 1, key="pco2_slider")
+    with c3:
+        st.session_state.hco3_val = st.slider("HCO₃⁻", 10, 40, st.session_state.hco3_val, 1, key="hco3_slider")
+    with c4:
+        st.session_state.renal_val = st.slider("Excreción H⁺ (%)", 25, 200, st.session_state.renal_val, 5, key="renal_slider")
 
-    # Puntaje cualitativo para resumen inmediato
+    ventilacion = st.session_state.vent_val
+    pco2 = st.session_state.pco2_val
+    hco3 = st.session_state.hco3_val
+    excrecion_h = st.session_state.renal_val
+
     acid_score = 0
     alk_score = 0
-
     if pco2 > 45: acid_score += 2
     elif pco2 < 35: alk_score += 2
-
     if hco3 < 22: acid_score += 2
     elif hco3 > 26: alk_score += 2
-
     if ventilacion < 80: acid_score += 1
     elif ventilacion > 120: alk_score += 1
-
     if excrecion_h < 80: acid_score += 1
     elif excrecion_h > 120: alk_score += 1
 
-    # Resumen visible inmediatamente
     if acid_score == 0 and alk_score == 0:
         global_txt = "Condición cercana a referencia"
         global_cls = "summary-normal"
@@ -241,7 +378,7 @@ with tab2:
     else:
         global_txt = "Fuerzas opuestas"
         global_cls = "summary-warn"
-        global_msg = "Puede existir compensación o un patrón mixto. Debe integrarse con pH, PCO₂ y HCO₃⁻."
+        global_msg = "Puede existir compensación o un patrón mixto; integra pH, PCO₂ y HCO₃⁻."
 
     st.markdown(
         f'<div class="summary-state {global_cls}">'
@@ -251,14 +388,12 @@ with tab2:
         unsafe_allow_html=True
     )
 
-    # Lectura específica, compacta
     r1, r2 = st.columns(2)
-
     with r1:
         if pco2 > 45:
-            st.markdown('<div class="status-card status-acid"><div class="big-state">PCO₂ alta → tendencia respiratoria acidificante</div><div>↑ CO₂ → ↑ H⁺ → ↓ pH</div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="status-card status-acid"><div class="big-state">PCO₂ alta</div><div>↑ CO₂ → ↑ H⁺ → ↓ pH</div></div>', unsafe_allow_html=True)
         elif pco2 < 35:
-            st.markdown('<div class="status-card status-alk"><div class="big-state">PCO₂ baja → tendencia respiratoria alcalinizante</div><div>↓ CO₂ → ↓ H⁺ → ↑ pH</div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="status-card status-alk"><div class="big-state">PCO₂ baja</div><div>↓ CO₂ → ↓ H⁺ → ↑ pH</div></div>', unsafe_allow_html=True)
         else:
             st.markdown('<div class="status-card status-normal"><div class="big-state">PCO₂ en rango</div><div>35–45 mmHg</div></div>', unsafe_allow_html=True)
 
@@ -271,9 +406,9 @@ with tab2:
 
     with r2:
         if hco3 < 22:
-            st.markdown('<div class="status-card status-acid"><div class="big-state">HCO₃⁻ bajo → tendencia metabólica acidificante</div><div>Menor base disponible → tendencia a ↓ pH</div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="status-card status-acid"><div class="big-state">HCO₃⁻ bajo</div><div>Menor base disponible → tendencia a ↓ pH</div></div>', unsafe_allow_html=True)
         elif hco3 > 26:
-            st.markdown('<div class="status-card status-alk"><div class="big-state">HCO₃⁻ alto → tendencia metabólica alcalinizante</div><div>Mayor componente básico → tendencia a ↑ pH</div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="status-card status-alk"><div class="big-state">HCO₃⁻ alto</div><div>Mayor componente básico → tendencia a ↑ pH</div></div>', unsafe_allow_html=True)
         else:
             st.markdown('<div class="status-card status-normal"><div class="big-state">HCO₃⁻ en rango</div><div>22–26 mEq/L</div></div>', unsafe_allow_html=True)
 
@@ -285,7 +420,7 @@ with tab2:
             st.markdown('<div class="status-card status-normal"><div class="big-state">Excreción renal cercana a referencia</div></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="flow-box">CO₂ + H₂O ⇄ H₂CO₃ ⇄ H⁺ + HCO₃⁻</div>', unsafe_allow_html=True)
-    st.caption("Simulación cualitativa educativa: no calcula compensaciones esperadas ni trastornos mixtos complejos.")
+    st.caption("Simulación cualitativa educativa. No calcula compensaciones esperadas cuantitativamente.")
 
 with tab3:
     st.subheader("Interpretación guiada de gasometría")
