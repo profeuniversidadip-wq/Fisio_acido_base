@@ -57,3 +57,9 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Se eliminan los controles inferiores.
 - Cada parámetro muestra su condición justo debajo.
 - Resumen ácido-base más pequeño e inmediatamente bajo el panel, para evitar desplazamiento vertical.
+
+## Mejora v8
+- Navegación principal convertida en recuadros de color.
+- Cada sección tiene un color propio.
+- La pestaña activa cambia a un tono más intenso con borde destacado.
+- En celular, los cuatro botones se organizan en una cuadrícula 2x2.

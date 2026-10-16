@@ -168,13 +168,84 @@ html, body, [class*="css"] {font-size: 17px;}
     margin-top:.25rem;
 }
 
+
+/* Pestañas principales como botones de color */
+.stTabs [data-baseweb="tab-list"]{
+    gap:.45rem !important;
+    background:transparent !important;
+    padding:.15rem 0 .45rem 0 !important;
+}
+.stTabs [data-baseweb="tab"]{
+    border-radius:12px !important;
+    border:1px solid rgba(60,90,120,.18) !important;
+    padding:.55rem .9rem !important;
+    font-weight:800 !important;
+    min-height:42px !important;
+    transition:all .18s ease !important;
+}
+.stTabs [data-baseweb="tab"]:nth-child(1){
+    background:#E3F2FD !important;
+}
+.stTabs [data-baseweb="tab"]:nth-child(2){
+    background:#E8EAF6 !important;
+}
+.stTabs [data-baseweb="tab"]:nth-child(3){
+    background:#E8F5E9 !important;
+}
+.stTabs [data-baseweb="tab"]:nth-child(4){
+    background:#FFF3E0 !important;
+}
+.stTabs [aria-selected="true"]:nth-child(1){
+    background:#90CAF9 !important;
+    border:2px solid #1976D2 !important;
+    color:#0D47A1 !important;
+    box-shadow:0 2px 7px rgba(25,118,210,.18) !important;
+}
+.stTabs [aria-selected="true"]:nth-child(2){
+    background:#9FA8DA !important;
+    border:2px solid #3949AB !important;
+    color:#1A237E !important;
+    box-shadow:0 2px 7px rgba(57,73,171,.18) !important;
+}
+.stTabs [aria-selected="true"]:nth-child(3){
+    background:#A5D6A7 !important;
+    border:2px solid #388E3C !important;
+    color:#1B5E20 !important;
+    box-shadow:0 2px 7px rgba(56,142,60,.18) !important;
+}
+.stTabs [aria-selected="true"]:nth-child(4){
+    background:#FFCC80 !important;
+    border:2px solid #F57C00 !important;
+    color:#E65100 !important;
+    box-shadow:0 2px 7px rgba(245,124,0,.18) !important;
+}
+.stTabs [data-baseweb="tab-highlight"]{
+    display:none !important;
+}
+@media (max-width:760px){
+    .stTabs [data-baseweb="tab-list"]{
+        display:grid !important;
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:.35rem !important;
+        overflow:visible !important;
+    }
+    .stTabs [data-baseweb="tab"]{
+        width:100% !important;
+        justify-content:center !important;
+        padding:.5rem .55rem !important;
+        font-size:.92rem !important;
+        white-space:normal !important;
+        text-align:center !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-title">Equilibrio ácido-base</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Comprender antes de memorizar · Fisiología y Fisiopatología · Kinesiología</div>', unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4 = st.tabs(["1. Fundamentos", "2. Simulador", "3. Gasometría", "4. Práctica"])
+tab1, tab2, tab3, tab4 = st.tabs(["Fundamentos", "Simulador", "Gasometría", "Práctica"])
 
 with tab1:
     st.subheader("La idea central")
