@@ -63,3 +63,15 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Cada sección tiene un color propio.
 - La pestaña activa cambia a un tono más intenso con borde destacado.
 - En celular, los cuatro botones se organizan en una cuadrícula 2x2.
+
+## Mejora v9
+- Faders verticales más delgados y más cortos.
+- Panel compacto para que se vea completo en celular.
+- Se minimiza el desplazamiento vertical dentro del simulador.
+- Corrección táctil: se reduce el movimiento involuntario de la pantalla al arrastrar faders.
+
+## Mejora v10
+- Navegación estilo archivador.
+- Las cuatro pestañas conservan siempre su color.
+- La sección seleccionada se destaca con borde y relieve.
+- En monitor se muestran como pestañas de carpeta; en móvil se mantienen como botones de color 2x2.
