@@ -81,3 +81,19 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Interacción mediante Pointer Events para mouse y pantalla táctil.
 - El fader captura el gesto y evita desplazar la página mientras se arrastra.
 - Panel más corto y delgado para celular.
+
+## Mejora v12
+- La explicación fisiológica ahora aparece directamente debajo de cada fader.
+- Se eliminó el bloque explicativo inferior que quedaba cortado en celular.
+- Se aumentó ligeramente la altura del componente para evitar recortes.
+
+## Mejora v13
+- Panel del simulador con fondo blanco.
+- Recuadros de cada fader más delgados y discretos.
+- Faders y controles más finos.
+- Mejor contraste y aspecto más limpio en celular y monitor.
+
+## Mejora v14
+- Se reemplaza el fondo oscuro por azul grisáceo suave.
+- Panel general muy claro para mantener aspecto limpio.
+- Mejor contraste visual sin usar negro.

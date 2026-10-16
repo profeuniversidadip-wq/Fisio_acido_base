@@ -324,10 +324,10 @@ with tab2:
       *{box-sizing:border-box;}
       .ab-wrap{
         font-family:Arial,Helvetica,sans-serif;
-        border:1px solid #d8e0e8;
+        border:1px solid #e3e8ee;
         border-radius:18px;
-        padding:10px;
-        background:linear-gradient(180deg,#f8fbff 0%,#eef5fb 100%);
+        padding:8px;
+        background:#F8FBFE;
         user-select:none;
         -webkit-user-select:none;
       }
@@ -337,12 +337,13 @@ with tab2:
         gap:8px;
       }
       .ab-channel{
-        background:#14202b;
-        border-radius:13px;
-        padding:8px 6px 9px;
+        background:#F3F7FB;
+        border-radius:11px;
+        padding:7px 5px 7px;
         text-align:center;
-        color:white;
+        color:#17324D;
         min-width:0;
+        border:1px solid #D8E3EC;
       }
       .ab-label{
         font-size:12px;
@@ -367,22 +368,22 @@ with tab2:
       }
       .vtrack{
         position:relative;
-        width:18px;
+        width:12px;
         height:122px;
         border-radius:999px;
-        background:linear-gradient(to top,#4b5563,#9ca3af);
+        background:linear-gradient(to top,#D6E2EC,#9FB5C7);
         box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
         touch-action:none;
       }
       .vhandle{
         position:absolute;
         left:50%;
-        width:34px;
-        height:18px;
+        width:28px;
+        height:15px;
         transform:translate(-50%,50%);
         border-radius:5px;
         background:#f8fafc;
-        border:2px solid #0f172a;
+        border:1.5px solid #64748b;
         box-shadow:0 2px 5px rgba(0,0,0,.35);
         cursor:grab;
         touch-action:none;
@@ -392,20 +393,21 @@ with tab2:
         display:flex;
         justify-content:space-between;
         font-size:9px;
-        color:#cbd5e1;
+        color:#64748b;
         margin:1px 2px 0;
       }
       .mini-status{
         margin-top:5px;
         border-radius:9px;
-        padding:5px 6px;
-        font-size:10px;
+        padding:6px 6px;
+        font-size:9px;
         font-weight:700;
-        line-height:1.15;
-        min-height:29px;
+        line-height:1.2;
+        min-height:42px;
         display:flex;
         align-items:center;
         justify-content:center;
+        text-align:center;
       }
       .mini-normal{background:#e8f5e9;color:#1b5e20;}
       .mini-acid{background:#ffebee;color:#b71c1c;}
@@ -423,28 +425,14 @@ with tab2:
       .sum-normal{background:#e8f5e9;color:#1b5e20;}
       .sum-acid{background:#ffebee;color:#b71c1c;}
       .sum-alk{background:#e3f2fd;color:#0d47a1;}
-      .sum-warn{background:#fff8e1;color:#8d6e00;}
-      .details{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:6px;
-        margin-top:7px;
-      }
-      .detail-card{
-        border-radius:9px;
-        padding:5px 7px;
-        font-size:10px;
-        line-height:1.15;
-        border:1px solid rgba(80,110,140,.14);
-      }
-      .equation{
+      .sum-warn{background:#fff8e1;color:#8d6e00;}      .equation{
         text-align:center;
         font-weight:800;
         font-size:11px;
         margin-top:7px;
         padding:6px;
         border-radius:9px;
-        background:#fff;
+        background:#FFFFFF;
         border:1px solid rgba(80,110,140,.15);
       }
       .note{
@@ -464,13 +452,12 @@ with tab2:
           gap:7px;
         }
         .fader-area{height:118px;}
-        .vtrack{height:102px;width:16px;}
-        .vhandle{width:31px;height:17px;}
+        .vtrack{height:102px;width:11px;}
+        .vhandle{width:27px;height:15px;}
         .ab-channel{padding:7px 5px 8px;}
         .ab-label{font-size:11px;min-height:25px;}
         .ab-value{font-size:12px;}
         .mini-status{font-size:9px;min-height:26px;padding:4px 5px;}
-        .details{grid-template-columns:1fr;}
       }
     </style>
 
@@ -530,13 +517,6 @@ with tab2:
       <div id="summary" class="summary sum-normal">
         <div class="title">Condición cercana a referencia</div>
         <div id="summaryText">Sin predominio acidificante ni alcalinizante.</div>
-      </div>
-
-      <div class="details">
-        <div id="d1" class="detail-card" style="background:#fff;">PCO₂ en rango · 35–45 mmHg</div>
-        <div id="d2" class="detail-card" style="background:#fff;">HCO₃⁻ en rango · 22–26 mEq/L</div>
-        <div id="d3" class="detail-card" style="background:#fff;">Ventilación cercana a referencia</div>
-        <div id="d4" class="detail-card" style="background:#fff;">Excreción renal cercana a referencia</div>
       </div>
 
       <div class="equation">CO₂ + H₂O ⇄ H₂CO₃ ⇄ H⁺ + HCO₃⁻</div>
@@ -622,11 +602,6 @@ with tab2:
         el.textContent=text;
       }
 
-      function setDetail(id,text,bg){
-        const el=document.getElementById(id);
-        el.textContent=text;
-        el.style.background=bg;
-      }
 
       function updateMixer(){
         const v=Number(tracks.vent.dataset.value);
@@ -641,21 +616,21 @@ with tab2:
 
         let acid=0, alk=0;
 
-        if(p>45){ acid+=2; setStatus('pco2Status','Alta','mini-acid'); setDetail('d1','PCO₂ alta → ↑ CO₂ → ↑ H⁺ → ↓ pH','#ffebee');}
-        else if(p<35){ alk+=2; setStatus('pco2Status','Baja','mini-alk'); setDetail('d1','PCO₂ baja → ↓ CO₂ → ↓ H⁺ → ↑ pH','#e3f2fd');}
-        else{ setStatus('pco2Status','En rango','mini-normal'); setDetail('d1','PCO₂ en rango · 35–45 mmHg','#fff');}
+        if(p>45){ acid+=2; setStatus('pco2Status','Alta · ↑ CO₂ → ↑ H⁺ → ↓ pH','mini-acid');}
+        else if(p<35){ alk+=2; setStatus('pco2Status','Baja · ↓ CO₂ → ↓ H⁺ → ↑ pH','mini-alk');}
+        else{ setStatus('pco2Status','En rango · 35–45 mmHg','mini-normal');}
 
-        if(h<22){ acid+=2; setStatus('hco3Status','Bajo','mini-acid'); setDetail('d2','HCO₃⁻ bajo → menor base → ↓ pH','#ffebee');}
-        else if(h>26){ alk+=2; setStatus('hco3Status','Alto','mini-alk'); setDetail('d2','HCO₃⁻ alto → mayor base → ↑ pH','#e3f2fd');}
-        else{ setStatus('hco3Status','En rango','mini-normal'); setDetail('d2','HCO₃⁻ en rango · 22–26 mEq/L','#fff');}
+        if(h<22){ acid+=2; setStatus('hco3Status','Bajo · menor base → ↓ pH','mini-acid');}
+        else if(h>26){ alk+=2; setStatus('hco3Status','Alto · mayor base → ↑ pH','mini-alk');}
+        else{ setStatus('hco3Status','En rango · 22–26 mEq/L','mini-normal');}
 
-        if(v<80){ acid+=1; setStatus('ventStatus','Hipoventilación','mini-acid'); setDetail('d3','↓ ventilación → ↑ CO₂ → ↓ pH','#ffebee');}
-        else if(v>120){ alk+=1; setStatus('ventStatus','Hiperventilación','mini-alk'); setDetail('d3','↑ ventilación → ↓ CO₂ → ↑ pH','#e3f2fd');}
-        else{ setStatus('ventStatus','Referencia','mini-normal'); setDetail('d3','Ventilación cercana a referencia','#fff');}
+        if(v<80){ acid+=1; setStatus('ventStatus','Hipoventilación · ↑ CO₂ → ↓ pH','mini-acid');}
+        else if(v>120){ alk+=1; setStatus('ventStatus','Hiperventilación · ↓ CO₂ → ↑ pH','mini-alk');}
+        else{ setStatus('ventStatus','Ventilación cercana a referencia','mini-normal');}
 
-        if(r<80){ acid+=1; setStatus('renalStatus','Menor excreción','mini-acid'); setDetail('d4','↓ excreción H⁺ → retención relativa de ácido','#ffebee');}
-        else if(r>120){ alk+=1; setStatus('renalStatus','Mayor excreción','mini-alk'); setDetail('d4','↑ excreción H⁺ → menor carga ácida','#e3f2fd');}
-        else{ setStatus('renalStatus','Referencia','mini-normal'); setDetail('d4','Excreción renal cercana a referencia','#fff');}
+        if(r<80){ acid+=1; setStatus('renalStatus','Menor excreción · retención de H⁺ → ↓ pH','mini-acid');}
+        else if(r>120){ alk+=1; setStatus('renalStatus','Mayor excreción · ↓ carga ácida → ↑ pH','mini-alk');}
+        else{ setStatus('renalStatus','Excreción renal cercana a referencia','mini-normal');}
 
         const s=document.getElementById('summary');
         const st=s.querySelector('.title');
@@ -688,7 +663,7 @@ with tab2:
     </script>
     """
 
-    components.html(mixer_html, height=510, scrolling=False)
+    components.html(mixer_html, height=560, scrolling=False)
 
 with tab3:
     st.subheader("Interpretación guiada de gasometría")
