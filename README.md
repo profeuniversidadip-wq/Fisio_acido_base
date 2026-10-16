@@ -1,5 +1,5 @@
 
-# FisioÁcidoBase IA — versión 1
+# FisioÁcidoBase IA — versión 2
 
 Primera versión funcional de una aplicación educativa para comprender el equilibrio ácido-base.
 
@@ -20,3 +20,8 @@ Valores utilizados porque aparecen explícitamente en el material:
 Esta primera versión no calcula fórmulas cuantitativas de compensación ni diagnostica trastornos mixtos complejos.
 
 Creado por Cristian Barahona Videla · Uso educativo · © 2026
+
+## Mejora v2
+- Simulador con faders para ventilación, PCO₂, HCO₃⁻ y excreción renal de H⁺.
+- Tarjetas de estado con identificación visual de tendencia acidificante, alcalinizante, normal o mixta.
+- Resumen integrado de las fuerzas ácido-base.

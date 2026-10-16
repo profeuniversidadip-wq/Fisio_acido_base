@@ -31,6 +31,27 @@ html, body, [class*="css"] {font-size: 17px;}
     margin:.75rem 0;
 }
 .small {font-size:.92rem; opacity:.82;}
+.status-card {
+    border-radius:16px;
+    padding:16px 18px;
+    margin:.65rem 0;
+    border:1px solid rgba(80,110,140,.22);
+}
+.status-normal {background:#E8F5E9; border-left:7px solid #2E7D32;}
+.status-acid {background:#FFEBEE; border-left:7px solid #C62828;}
+.status-alk {background:#E3F2FD; border-left:7px solid #1565C0;}
+.status-warn {background:#FFF8E1; border-left:7px solid #F9A825;}
+.big-state {font-size:1.25rem; font-weight:800; margin-bottom:.25rem;}
+.flow-box {
+    text-align:center;
+    font-size:1.05rem;
+    font-weight:700;
+    padding:12px 10px;
+    border-radius:12px;
+    background:rgba(255,255,255,.72);
+    border:1px solid rgba(80,110,140,.20);
+    margin-top:.55rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -74,58 +95,168 @@ with tab1:
     """)
 
 with tab2:
-    st.subheader("Simulador cualitativo")
-    st.caption("Mueve una variable y predice primero qué debería ocurrir con H⁺ y el pH.")
+    st.subheader("Simulador dinámico")
+    st.caption("Mueve los faders y observa cómo cambia la tendencia ácido-base. Los rangos son educativos y se interpretan con los valores de referencia del material.")
 
-    var = st.radio(
-        "¿Qué quieres modificar?",
-        ["Ventilación", "PCO₂", "HCO₃⁻", "Excreción renal de H⁺"],
-        horizontal=True
+    st.markdown("### Variables principales")
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        ventilacion = st.slider(
+            "Ventilación alveolar relativa (%)",
+            min_value=25,
+            max_value=200,
+            value=100,
+            step=5,
+            help="100% representa una ventilación de referencia. No equivale a un valor clínico medido."
+        )
+        pco2 = st.slider(
+            "PCO₂ (mmHg)",
+            min_value=20,
+            max_value=70,
+            value=40,
+            step=1
+        )
+
+    with c2:
+        hco3 = st.slider(
+            "HCO₃⁻ (mEq/L)",
+            min_value=10,
+            max_value=40,
+            value=24,
+            step=1
+        )
+        excrecion_h = st.slider(
+            "Excreción renal relativa de H⁺ (%)",
+            min_value=25,
+            max_value=200,
+            value=100,
+            step=5,
+            help="100% representa una condición de referencia. Es un control conceptual, no una medición clínica directa."
+        )
+
+    # Interpretación independiente de cada variable.
+    if pco2 > 45:
+        resp = "Tendencia respiratoria acidificante"
+        resp_cls = "status-acid"
+        resp_chain = "↑ PCO₂ → ↑ H₂CO₃ → ↑ H⁺ → ↓ pH"
+    elif pco2 < 35:
+        resp = "Tendencia respiratoria alcalinizante"
+        resp_cls = "status-alk"
+        resp_chain = "↓ PCO₂ → ↓ H⁺ → ↑ pH"
+    else:
+        resp = "Componente respiratorio en rango"
+        resp_cls = "status-normal"
+        resp_chain = "PCO₂ entre 35–45 mmHg"
+
+    if hco3 < 22:
+        met = "Tendencia metabólica acidificante"
+        met_cls = "status-acid"
+        met_chain = "↓ HCO₃⁻ → menor capacidad amortiguadora → tendencia a ↓ pH"
+    elif hco3 > 26:
+        met = "Tendencia metabólica alcalinizante"
+        met_cls = "status-alk"
+        met_chain = "↑ HCO₃⁻ → mayor componente básico → tendencia a ↑ pH"
+    else:
+        met = "Componente metabólico en rango"
+        met_cls = "status-normal"
+        met_chain = "HCO₃⁻ entre 22–26 mEq/L"
+
+    if ventilacion < 80:
+        vent_txt = "Hipoventilación relativa"
+        vent_cls = "status-acid"
+        vent_chain = "↓ ventilación → ↓ eliminación de CO₂ → tendencia a ↑ PCO₂ → ↓ pH"
+    elif ventilacion > 120:
+        vent_txt = "Hiperventilación relativa"
+        vent_cls = "status-alk"
+        vent_chain = "↑ ventilación → ↑ eliminación de CO₂ → tendencia a ↓ PCO₂ → ↑ pH"
+    else:
+        vent_txt = "Ventilación cercana a referencia"
+        vent_cls = "status-normal"
+        vent_chain = "La ventilación no sugiere un desplazamiento importante por sí sola"
+
+    if excrecion_h < 80:
+        renal_txt = "Menor eliminación renal de H⁺"
+        renal_cls = "status-acid"
+        renal_chain = "↓ excreción de H⁺ → retención relativa de ácido → tendencia a ↓ pH"
+    elif excrecion_h > 120:
+        renal_txt = "Mayor eliminación renal de H⁺"
+        renal_cls = "status-alk"
+        renal_chain = "↑ excreción de H⁺ → menor carga ácida → apoyo a ↑ pH"
+    else:
+        renal_txt = "Excreción renal cercana a referencia"
+        renal_cls = "status-normal"
+        renal_chain = "Sin desplazamiento renal marcado en el simulador"
+
+    st.markdown("### Lectura inmediata")
+    r1, r2 = st.columns(2)
+    with r1:
+        st.markdown(
+            f'<div class="status-card {resp_cls}"><div class="big-state">{resp}</div>'
+            f'<div>{resp_chain}</div></div>',
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            f'<div class="status-card {vent_cls}"><div class="big-state">{vent_txt}</div>'
+            f'<div>{vent_chain}</div></div>',
+            unsafe_allow_html=True
+        )
+    with r2:
+        st.markdown(
+            f'<div class="status-card {met_cls}"><div class="big-state">{met}</div>'
+            f'<div>{met_chain}</div></div>',
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            f'<div class="status-card {renal_cls}"><div class="big-state">{renal_txt}</div>'
+            f'<div>{renal_chain}</div></div>',
+            unsafe_allow_html=True
+        )
+
+    # Resumen global cualitativo.
+    acid_score = 0
+    alk_score = 0
+
+    if pco2 > 45: acid_score += 2
+    elif pco2 < 35: alk_score += 2
+
+    if hco3 < 22: acid_score += 2
+    elif hco3 > 26: alk_score += 2
+
+    if ventilacion < 80: acid_score += 1
+    elif ventilacion > 120: alk_score += 1
+
+    if excrecion_h < 80: acid_score += 1
+    elif excrecion_h > 120: alk_score += 1
+
+    st.markdown("### Estado integrado del simulador")
+
+    if acid_score == 0 and alk_score == 0:
+        global_txt = "Equilibrio cercano a condición de referencia"
+        global_cls = "status-normal"
+        global_msg = "Las variables principales se mantienen en rangos de referencia del simulador."
+    elif acid_score > alk_score:
+        global_txt = "Predominio de fuerzas acidificantes"
+        global_cls = "status-acid"
+        global_msg = "Las variables seleccionadas favorecen un aumento relativo de H⁺ y una tendencia a disminuir el pH."
+    elif alk_score > acid_score:
+        global_txt = "Predominio de fuerzas alcalinizantes"
+        global_cls = "status-alk"
+        global_msg = "Las variables seleccionadas favorecen una disminución relativa de H⁺ y una tendencia a elevar el pH."
+    else:
+        global_txt = "Fuerzas opuestas: posible compensación o trastorno mixto"
+        global_cls = "status-warn"
+        global_msg = "Hay variables acidificantes y alcalinizantes simultáneamente. Se debe interpretar el pH, la PCO₂ y el HCO₃⁻ en conjunto."
+
+    st.markdown(
+        f'<div class="status-card {global_cls}"><div class="big-state">{global_txt}</div>'
+        f'<div>{global_msg}</div>'
+        f'<div class="flow-box">CO₂ + H₂O ⇄ H₂CO₃ ⇄ H⁺ + HCO₃⁻</div></div>',
+        unsafe_allow_html=True
     )
 
-    if var == "Ventilación":
-        estado = st.select_slider("Ventilación", options=["Disminuida", "Normal", "Aumentada"], value="Normal")
-        if estado == "Disminuida":
-            st.markdown("**Cadena:** ↓ ventilación → ↓ eliminación de CO₂ → ↑ CO₂ → ↑ H⁺ → ↓ pH")
-            st.error("Tendencia acidificante de origen respiratorio.")
-        elif estado == "Aumentada":
-            st.markdown("**Cadena:** ↑ ventilación → ↑ eliminación de CO₂ → ↓ CO₂ → ↓ H⁺ → ↑ pH")
-            st.success("Tendencia alcalinizante de origen respiratorio.")
-        else:
-            st.info("Sin cambio primario respiratorio simulado.")
-
-    elif var == "PCO₂":
-        estado = st.select_slider("PCO₂", options=["Baja", "Normal", "Alta"], value="Normal")
-        if estado == "Alta":
-            st.markdown("**Cadena:** ↑ CO₂ → reacción hacia H⁺ + HCO₃⁻ → ↑ H⁺ → ↓ pH")
-            st.error("Compatible con tendencia a acidosis respiratoria.")
-        elif estado == "Baja":
-            st.markdown("**Cadena:** ↓ CO₂ → ↓ H⁺ → ↑ pH")
-            st.success("Compatible con tendencia a alcalosis respiratoria.")
-        else:
-            st.info("PCO₂ dentro del intervalo de referencia usado en el material.")
-
-    elif var == "HCO₃⁻":
-        estado = st.select_slider("HCO₃⁻", options=["Bajo", "Normal", "Alto"], value="Normal")
-        if estado == "Bajo":
-            st.markdown("**Interpretación:** hay menor base disponible para amortiguar H⁺.")
-            st.error("Compatible con tendencia a acidosis metabólica.")
-        elif estado == "Alto":
-            st.markdown("**Interpretación:** aumenta el componente básico del sistema bicarbonato.")
-            st.success("Compatible con tendencia a alcalosis metabólica.")
-        else:
-            st.info("HCO₃⁻ dentro del intervalo de referencia usado en el material.")
-
-    else:
-        estado = st.select_slider("Excreción renal de H⁺", options=["Disminuida", "Normal", "Aumentada"], value="Normal")
-        if estado == "Disminuida":
-            st.markdown("**Cadena:** ↓ excreción de H⁺ → retención relativa de ácido → ↓ pH")
-            st.error("Tendencia acidificante.")
-        elif estado == "Aumentada":
-            st.markdown("**Cadena:** ↑ excreción de H⁺ + conservación de HCO₃⁻ → apoyo a recuperación del pH")
-            st.success("Respuesta renal que favorece una menor carga ácida.")
-        else:
-            st.info("Sin modificación renal simulada.")
+    st.caption("Nota: el simulador muestra relaciones fisiológicas cualitativas. No calcula compensaciones esperadas ni reemplaza la interpretación clínica completa.")
 
 with tab3:
     st.subheader("Interpretación guiada de gasometría")
