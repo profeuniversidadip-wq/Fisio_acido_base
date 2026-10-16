@@ -25,3 +25,23 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Simulador con faders para ventilación, PCO₂, HCO₃⁻ y excreción renal de H⁺.
 - Tarjetas de estado con identificación visual de tendencia acidificante, alcalinizante, normal o mixta.
 - Resumen integrado de las fuerzas ácido-base.
+
+## Mejora v3
+- Diseño responsivo para monitor y celular.
+- Título con mayor margen superior para evitar recorte.
+- Faders apilados en una sola columna en pantallas pequeñas.
+- Tarjetas y pestañas optimizadas para móvil.
+
+## Mejora v4
+- Simulador compacto.
+- Resumen de condición ácido-base visible inmediatamente bajo los faders.
+- Tarjetas más pequeñas y colores más evidentes.
+- Menor desplazamiento vertical en monitor y celular.
+
+## Mejora v5
+- Práctica dividida en 3 tandas.
+- Tanda 1: fundamentos.
+- Tanda 2: aplicación e interpretación básica de gasometría.
+- Tanda 3: casos clínicos.
+- Cada respuesta muestra una explicación breve del mecanismo.
+- Navegación por ventanas con identificación de color.
