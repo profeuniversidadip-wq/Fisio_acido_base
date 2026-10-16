@@ -75,3 +75,9 @@ Creado por Cristian Barahona Videla · Uso educativo · © 2026
 - Las cuatro pestañas conservan siempre su color.
 - La sección seleccionada se destaca con borde y relieve.
 - En monitor se muestran como pestañas de carpeta; en móvil se mantienen como botones de color 2x2.
+
+## Mejora v11
+- Reemplazo de sliders rotados por faders verticales personalizados.
+- Interacción mediante Pointer Events para mouse y pantalla táctil.
+- El fader captura el gesto y evita desplazar la página mientras se arrastra.
+- Panel más corto y delgado para celular.

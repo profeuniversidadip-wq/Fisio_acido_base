@@ -317,131 +317,113 @@ with tab1:
 
 with tab2:
     st.subheader("Simulador dinámico")
-    st.caption("Panel interactivo tipo mesa de sonido. Los propios faders son móviles; fueron compactados para verse completos en celular.")
+    st.caption("Faders verticales táctiles. Arrastra directamente el control con el dedo o mouse.")
 
     mixer_html = """
     <style>
+      *{box-sizing:border-box;}
       .ab-wrap{
-        font-family: Arial, Helvetica, sans-serif;
-        overscroll-behavior: contain;
-        -webkit-user-select:none;
-        user-select:none;
+        font-family:Arial,Helvetica,sans-serif;
         border:1px solid #d8e0e8;
         border-radius:18px;
-        padding:10px 10px 8px;
-        background:linear-gradient(180deg,#f8fbff 0%, #eef5fb 100%);
+        padding:10px;
+        background:linear-gradient(180deg,#f8fbff 0%,#eef5fb 100%);
+        user-select:none;
+        -webkit-user-select:none;
       }
       .ab-grid{
         display:grid;
-        grid-template-columns:repeat(4, minmax(82px,1fr));
-        gap:6px;
-        align-items:start;
+        grid-template-columns:repeat(4,minmax(78px,1fr));
+        gap:8px;
       }
       .ab-channel{
         background:#14202b;
         border-radius:13px;
-        padding:8px 6px 8px;
+        padding:8px 6px 9px;
         text-align:center;
         color:white;
-        box-shadow:0 3px 10px rgba(0,0,0,.12);
+        min-width:0;
       }
       .ab-label{
-        font-size:11px;
+        font-size:12px;
         font-weight:700;
-        line-height:1.15;
-        min-height:26px;
-        margin-bottom:4px;
+        line-height:1.1;
+        min-height:27px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
       }
       .ab-value{
         font-size:13px;
         font-weight:800;
-        margin-bottom:5px;
+        margin:3px 0 5px;
       }
-      .slider-box{
-        height:150px;
+      .fader-area{
+        height:138px;
         display:flex;
         align-items:center;
         justify-content:center;
-        margin:0 auto 6px;
+        touch-action:none;
       }
-      input[type=range].vslider{
-        -webkit-appearance:none;
-        appearance:none;
-        width:132px;
-        height:7px;
-        transform:rotate(-90deg);
-        background:transparent;
-      }
-      input[type=range].vslider::-webkit-slider-runnable-track{
-        height:7px;
+      .vtrack{
+        position:relative;
+        width:18px;
+        height:122px;
         border-radius:999px;
-        background:linear-gradient(90deg,#4b5563 0%, #9ca3af 100%);
+        background:linear-gradient(to top,#4b5563,#9ca3af);
+        box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+        touch-action:none;
       }
-      input[type=range].vslider::-webkit-slider-thumb{
-        -webkit-appearance:none;
-        appearance:none;
-        width:12px;
-        height:20px;
-        border-radius:4px;
+      .vhandle{
+        position:absolute;
+        left:50%;
+        width:34px;
+        height:18px;
+        transform:translate(-50%,50%);
+        border-radius:5px;
         background:#f8fafc;
-        border:2px solid #111827;
-        margin-top:-7px;
-        box-shadow:0 2px 4px rgba(0,0,0,.28);
-        cursor:pointer;
+        border:2px solid #0f172a;
+        box-shadow:0 2px 5px rgba(0,0,0,.35);
+        cursor:grab;
+        touch-action:none;
       }
-      input[type=range].vslider::-moz-range-track{
-        height:7px;
-        border-radius:999px;
-        background:linear-gradient(90deg,#4b5563 0%, #9ca3af 100%);
-      }
-      input[type=range].vslider::-moz-range-thumb{
-        width:12px;
-        height:20px;
-        border-radius:4px;
-        background:#f8fafc;
-        border:2px solid #111827;
-        box-shadow:0 2px 4px rgba(0,0,0,.28);
-        cursor:pointer;
-      }
+      .vhandle:active{cursor:grabbing;}
       .scale{
         display:flex;
         justify-content:space-between;
-        color:#cbd5e1;
         font-size:9px;
-        margin-top:-3px;
+        color:#cbd5e1;
+        margin:1px 2px 0;
       }
       .mini-status{
         margin-top:5px;
-        border-radius:10px;
+        border-radius:9px;
         padding:5px 6px;
         font-size:10px;
         font-weight:700;
-        line-height:1.2;
-        min-height:26px;
+        line-height:1.15;
+        min-height:29px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
       }
       .mini-normal{background:#e8f5e9;color:#1b5e20;}
       .mini-acid{background:#ffebee;color:#b71c1c;}
       .mini-alk{background:#e3f2fd;color:#0d47a1;}
       .mini-warn{background:#fff8e1;color:#8d6e00;}
-
       .summary{
-        margin-top:7px;
-        border-radius:12px;
+        margin-top:8px;
+        border-radius:11px;
         padding:6px 9px;
         border:1px solid rgba(80,110,140,.20);
         font-size:11px;
         font-weight:700;
       }
-      .summary .title{
-        font-size:13px;
-        font-weight:800;
-        margin-bottom:2px;
-      }
+      .summary .title{font-size:13px;font-weight:800;margin-bottom:1px;}
       .sum-normal{background:#e8f5e9;color:#1b5e20;}
       .sum-acid{background:#ffebee;color:#b71c1c;}
       .sum-alk{background:#e3f2fd;color:#0d47a1;}
       .sum-warn{background:#fff8e1;color:#8d6e00;}
-
       .details{
         display:grid;
         grid-template-columns:1fr 1fr;
@@ -449,27 +431,27 @@ with tab2:
         margin-top:7px;
       }
       .detail-card{
-        border-radius:10px;
+        border-radius:9px;
         padding:5px 7px;
-        font-size:11px;
-        line-height:1.2;
+        font-size:10px;
+        line-height:1.15;
         border:1px solid rgba(80,110,140,.14);
       }
       .equation{
         text-align:center;
         font-weight:800;
-        font-size:12px;
+        font-size:11px;
         margin-top:7px;
         padding:6px;
-        border-radius:10px;
-        background:#ffffff;
+        border-radius:9px;
+        background:#fff;
         border:1px solid rgba(80,110,140,.15);
       }
       .note{
         text-align:center;
-        font-size:10px;
+        font-size:9px;
         color:#475569;
-        margin-top:6px;
+        margin-top:5px;
       }
       .blue{color:#60a5fa;}
       .pink{color:#fb7185;}
@@ -477,30 +459,43 @@ with tab2:
       .orange{color:#fbbf24;}
 
       @media(max-width:700px){
-        .ab-grid{grid-template-columns:repeat(2,minmax(95px,1fr));}
-        .slider-box{height:120px;}
-        input[type=range].vslider{width:102px;}
+        .ab-grid{
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:7px;
+        }
+        .fader-area{height:118px;}
+        .vtrack{height:102px;width:16px;}
+        .vhandle{width:31px;height:17px;}
+        .ab-channel{padding:7px 5px 8px;}
+        .ab-label{font-size:11px;min-height:25px;}
+        .ab-value{font-size:12px;}
+        .mini-status{font-size:9px;min-height:26px;padding:4px 5px;}
         .details{grid-template-columns:1fr;}
       }
     </style>
 
     <div class="ab-wrap">
       <div class="ab-grid">
+
         <div class="ab-channel">
           <div class="ab-label">Ventilación</div>
           <div id="ventVal" class="ab-value blue">100%</div>
-          <div class="slider-box">
-            <input id="vent" class="vslider" type="range" min="25" max="200" step="5" value="100">
+          <div class="fader-area">
+            <div id="ventTrack" class="vtrack" data-min="25" data-max="200" data-step="5" data-value="100">
+              <div class="vhandle"></div>
+            </div>
           </div>
           <div class="scale"><span>25</span><span>100</span><span>200</span></div>
-          <div id="ventStatus" class="mini-status mini-normal">Cercana a referencia</div>
+          <div id="ventStatus" class="mini-status mini-normal">Referencia</div>
         </div>
 
         <div class="ab-channel">
           <div class="ab-label">PCO₂</div>
           <div id="pco2Val" class="ab-value pink">40 mmHg</div>
-          <div class="slider-box">
-            <input id="pco2" class="vslider" type="range" min="20" max="70" step="1" value="40">
+          <div class="fader-area">
+            <div id="pco2Track" class="vtrack" data-min="20" data-max="70" data-step="1" data-value="40">
+              <div class="vhandle"></div>
+            </div>
           </div>
           <div class="scale"><span>20</span><span>45</span><span>70</span></div>
           <div id="pco2Status" class="mini-status mini-normal">En rango</div>
@@ -509,8 +504,10 @@ with tab2:
         <div class="ab-channel">
           <div class="ab-label">HCO₃⁻</div>
           <div id="hco3Val" class="ab-value green">24 mEq/L</div>
-          <div class="slider-box">
-            <input id="hco3" class="vslider" type="range" min="10" max="40" step="1" value="24">
+          <div class="fader-area">
+            <div id="hco3Track" class="vtrack" data-min="10" data-max="40" data-step="1" data-value="24">
+              <div class="vhandle"></div>
+            </div>
           </div>
           <div class="scale"><span>10</span><span>24</span><span>40</span></div>
           <div id="hco3Status" class="mini-status mini-normal">En rango</div>
@@ -519,12 +516,15 @@ with tab2:
         <div class="ab-channel">
           <div class="ab-label">Excreción renal H⁺</div>
           <div id="renalVal" class="ab-value orange">100%</div>
-          <div class="slider-box">
-            <input id="renal" class="vslider" type="range" min="25" max="200" step="5" value="100">
+          <div class="fader-area">
+            <div id="renalTrack" class="vtrack" data-min="25" data-max="200" data-step="5" data-value="100">
+              <div class="vhandle"></div>
+            </div>
           </div>
           <div class="scale"><span>25</span><span>100</span><span>200</span></div>
-          <div id="renalStatus" class="mini-status mini-normal">Cercana a referencia</div>
+          <div id="renalStatus" class="mini-status mini-normal">Referencia</div>
         </div>
+
       </div>
 
       <div id="summary" class="summary sum-normal">
@@ -533,136 +533,162 @@ with tab2:
       </div>
 
       <div class="details">
-        <div id="leftDetail1" class="detail-card" style="background:#ffffff;">PCO₂ en rango · 35–45 mmHg</div>
-        <div id="rightDetail1" class="detail-card" style="background:#ffffff;">HCO₃⁻ en rango · 22–26 mEq/L</div>
-        <div id="leftDetail2" class="detail-card" style="background:#ffffff;">Ventilación cercana a referencia</div>
-        <div id="rightDetail2" class="detail-card" style="background:#ffffff;">Excreción renal cercana a referencia</div>
+        <div id="d1" class="detail-card" style="background:#fff;">PCO₂ en rango · 35–45 mmHg</div>
+        <div id="d2" class="detail-card" style="background:#fff;">HCO₃⁻ en rango · 22–26 mEq/L</div>
+        <div id="d3" class="detail-card" style="background:#fff;">Ventilación cercana a referencia</div>
+        <div id="d4" class="detail-card" style="background:#fff;">Excreción renal cercana a referencia</div>
       </div>
 
       <div class="equation">CO₂ + H₂O ⇄ H₂CO₃ ⇄ H⁺ + HCO₃⁻</div>
-      <div class="note">Simulación cualitativa educativa. No calcula compensaciones esperadas cuantitativamente.</div>
+      <div class="note">Arrastra el fader vertical. En celular se bloquea el desplazamiento de la página mientras lo mueves.</div>
     </div>
 
     <script>
-      const vent = document.getElementById('vent');
-      const pco2 = document.getElementById('pco2');
-      const hco3 = document.getElementById('hco3');
-      const renal = document.getElementById('renal');
+      const tracks = {
+        vent: document.getElementById('ventTrack'),
+        pco2: document.getElementById('pco2Track'),
+        hco3: document.getElementById('hco3Track'),
+        renal: document.getElementById('renalTrack')
+      };
 
-      const setBox = (el, text, cls) => {
-        el.className = 'mini-status ' + cls;
-        el.textContent = text;
-      };
-      const setDetail = (id, text, bg) => {
-        const el = document.getElementById(id);
-        el.textContent = text;
-        el.style.background = bg;
-      };
+      function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+
+      function getCfg(track){
+        return {
+          min:Number(track.dataset.min),
+          max:Number(track.dataset.max),
+          step:Number(track.dataset.step),
+          value:Number(track.dataset.value)
+        };
+      }
+
+      function setValue(track, raw){
+        const c=getCfg(track);
+        let v=clamp(raw,c.min,c.max);
+        v=Math.round((v-c.min)/c.step)*c.step+c.min;
+        v=clamp(v,c.min,c.max);
+        track.dataset.value=String(v);
+        positionHandle(track);
+        updateMixer();
+      }
+
+      function positionHandle(track){
+        const c=getCfg(track);
+        const pct=(c.value-c.min)/(c.max-c.min);
+        const handle=track.querySelector('.vhandle');
+        handle.style.bottom=(pct*100)+'%';
+      }
+
+      function valueFromPointer(track, clientY){
+        const c=getCfg(track);
+        const rect=track.getBoundingClientRect();
+        const y=clamp(clientY-rect.top,0,rect.height);
+        const pct=1-(y/rect.height);
+        return c.min+pct*(c.max-c.min);
+      }
+
+      function attachFader(track){
+        let active=false;
+
+        const start=(e)=>{
+          active=true;
+          track.setPointerCapture?.(e.pointerId);
+          e.preventDefault();
+          setValue(track,valueFromPointer(track,e.clientY));
+        };
+
+        const move=(e)=>{
+          if(!active) return;
+          e.preventDefault();
+          setValue(track,valueFromPointer(track,e.clientY));
+        };
+
+        const end=(e)=>{
+          if(!active) return;
+          active=false;
+          e.preventDefault();
+          try{ track.releasePointerCapture?.(e.pointerId); }catch(_){}
+        };
+
+        track.addEventListener('pointerdown',start,{passive:false});
+        track.addEventListener('pointermove',move,{passive:false});
+        track.addEventListener('pointerup',end,{passive:false});
+        track.addEventListener('pointercancel',end,{passive:false});
+      }
+
+      function setStatus(id,text,cls){
+        const el=document.getElementById(id);
+        el.className='mini-status '+cls;
+        el.textContent=text;
+      }
+
+      function setDetail(id,text,bg){
+        const el=document.getElementById(id);
+        el.textContent=text;
+        el.style.background=bg;
+      }
 
       function updateMixer(){
-        const v = Number(vent.value);
-        const p = Number(pco2.value);
-        const h = Number(hco3.value);
-        const r = Number(renal.value);
+        const v=Number(tracks.vent.dataset.value);
+        const p=Number(tracks.pco2.dataset.value);
+        const h=Number(tracks.hco3.dataset.value);
+        const r=Number(tracks.renal.dataset.value);
 
-        document.getElementById('ventVal').textContent = v + '%';
-        document.getElementById('pco2Val').textContent = p + ' mmHg';
-        document.getElementById('hco3Val').textContent = h + ' mEq/L';
-        document.getElementById('renalVal').textContent = r + '%';
+        document.getElementById('ventVal').textContent=v+'%';
+        document.getElementById('pco2Val').textContent=p+' mmHg';
+        document.getElementById('hco3Val').textContent=h+' mEq/L';
+        document.getElementById('renalVal').textContent=r+'%';
 
-        let acidScore = 0;
-        let alkScore = 0;
+        let acid=0, alk=0;
 
-        // PCO2
-        if (p > 45){
-          acidScore += 2;
-          setBox(document.getElementById('pco2Status'), 'Alta', 'mini-acid');
-          setDetail('leftDetail1', 'PCO₂ alta → ↑ CO₂ → ↑ H⁺ → ↓ pH', '#ffebee');
-        } else if (p < 35){
-          alkScore += 2;
-          setBox(document.getElementById('pco2Status'), 'Baja', 'mini-alk');
-          setDetail('leftDetail1', 'PCO₂ baja → ↓ CO₂ → ↓ H⁺ → ↑ pH', '#e3f2fd');
-        } else {
-          setBox(document.getElementById('pco2Status'), 'En rango', 'mini-normal');
-          setDetail('leftDetail1', 'PCO₂ en rango · 35–45 mmHg', '#ffffff');
-        }
+        if(p>45){ acid+=2; setStatus('pco2Status','Alta','mini-acid'); setDetail('d1','PCO₂ alta → ↑ CO₂ → ↑ H⁺ → ↓ pH','#ffebee');}
+        else if(p<35){ alk+=2; setStatus('pco2Status','Baja','mini-alk'); setDetail('d1','PCO₂ baja → ↓ CO₂ → ↓ H⁺ → ↑ pH','#e3f2fd');}
+        else{ setStatus('pco2Status','En rango','mini-normal'); setDetail('d1','PCO₂ en rango · 35–45 mmHg','#fff');}
 
-        // HCO3
-        if (h < 22){
-          acidScore += 2;
-          setBox(document.getElementById('hco3Status'), 'Bajo', 'mini-acid');
-          setDetail('rightDetail1', 'HCO₃⁻ bajo → menor base → tendencia a ↓ pH', '#ffebee');
-        } else if (h > 26){
-          alkScore += 2;
-          setBox(document.getElementById('hco3Status'), 'Alto', 'mini-alk');
-          setDetail('rightDetail1', 'HCO₃⁻ alto → mayor base → tendencia a ↑ pH', '#e3f2fd');
-        } else {
-          setBox(document.getElementById('hco3Status'), 'En rango', 'mini-normal');
-          setDetail('rightDetail1', 'HCO₃⁻ en rango · 22–26 mEq/L', '#ffffff');
-        }
+        if(h<22){ acid+=2; setStatus('hco3Status','Bajo','mini-acid'); setDetail('d2','HCO₃⁻ bajo → menor base → ↓ pH','#ffebee');}
+        else if(h>26){ alk+=2; setStatus('hco3Status','Alto','mini-alk'); setDetail('d2','HCO₃⁻ alto → mayor base → ↑ pH','#e3f2fd');}
+        else{ setStatus('hco3Status','En rango','mini-normal'); setDetail('d2','HCO₃⁻ en rango · 22–26 mEq/L','#fff');}
 
-        // Ventilation
-        if (v < 80){
-          acidScore += 1;
-          setBox(document.getElementById('ventStatus'), 'Hipoventilación', 'mini-acid');
-          setDetail('leftDetail2', '↓ ventilación → ↓ eliminación de CO₂ → ↓ pH', '#ffebee');
-        } else if (v > 120){
-          alkScore += 1;
-          setBox(document.getElementById('ventStatus'), 'Hiperventilación', 'mini-alk');
-          setDetail('leftDetail2', '↑ ventilación → ↑ eliminación de CO₂ → ↑ pH', '#e3f2fd');
-        } else {
-          setBox(document.getElementById('ventStatus'), 'Cercana a referencia', 'mini-normal');
-          setDetail('leftDetail2', 'Ventilación cercana a referencia', '#ffffff');
-        }
+        if(v<80){ acid+=1; setStatus('ventStatus','Hipoventilación','mini-acid'); setDetail('d3','↓ ventilación → ↑ CO₂ → ↓ pH','#ffebee');}
+        else if(v>120){ alk+=1; setStatus('ventStatus','Hiperventilación','mini-alk'); setDetail('d3','↑ ventilación → ↓ CO₂ → ↑ pH','#e3f2fd');}
+        else{ setStatus('ventStatus','Referencia','mini-normal'); setDetail('d3','Ventilación cercana a referencia','#fff');}
 
-        // Renal H+
-        if (r < 80){
-          acidScore += 1;
-          setBox(document.getElementById('renalStatus'), 'Menor excreción', 'mini-acid');
-          setDetail('rightDetail2', '↓ excreción renal de H⁺ → retención relativa de ácido', '#ffebee');
-        } else if (r > 120){
-          alkScore += 1;
-          setBox(document.getElementById('renalStatus'), 'Mayor excreción', 'mini-alk');
-          setDetail('rightDetail2', '↑ excreción renal de H⁺ → menor carga ácida', '#e3f2fd');
-        } else {
-          setBox(document.getElementById('renalStatus'), 'Cercana a referencia', 'mini-normal');
-          setDetail('rightDetail2', 'Excreción renal cercana a referencia', '#ffffff');
-        }
+        if(r<80){ acid+=1; setStatus('renalStatus','Menor excreción','mini-acid'); setDetail('d4','↓ excreción H⁺ → retención relativa de ácido','#ffebee');}
+        else if(r>120){ alk+=1; setStatus('renalStatus','Mayor excreción','mini-alk'); setDetail('d4','↑ excreción H⁺ → menor carga ácida','#e3f2fd');}
+        else{ setStatus('renalStatus','Referencia','mini-normal'); setDetail('d4','Excreción renal cercana a referencia','#fff');}
 
-        const sum = document.getElementById('summary');
-        const sumText = document.getElementById('summaryText');
+        const s=document.getElementById('summary');
+        const st=s.querySelector('.title');
+        const txt=document.getElementById('summaryText');
 
-        if (acidScore === 0 && alkScore === 0){
-          sum.className = 'summary sum-normal';
-          sum.querySelector('.title').textContent = 'Condición cercana a referencia';
-          sumText.textContent = 'Sin predominio acidificante ni alcalinizante.';
-        } else if (acidScore > alkScore){
-          sum.className = 'summary sum-acid';
-          sum.querySelector('.title').textContent = 'Predominio acidificante';
-          sumText.textContent = 'Las variables favorecen ↑ H⁺ y tendencia a ↓ pH.';
-        } else if (alkScore > acidScore){
-          sum.className = 'summary sum-alk';
-          sum.querySelector('.title').textContent = 'Predominio alcalinizante';
-          sumText.textContent = 'Las variables favorecen ↓ H⁺ y tendencia a ↑ pH.';
-        } else {
-          sum.className = 'summary sum-warn';
-          sum.querySelector('.title').textContent = 'Fuerzas opuestas';
-          sumText.textContent = 'Puede existir compensación o un patrón mixto; integra pH, PCO₂ y HCO₃⁻.';
+        if(acid===0 && alk===0){
+          s.className='summary sum-normal';
+          st.textContent='Condición cercana a referencia';
+          txt.textContent='Sin predominio acidificante ni alcalinizante.';
+        }else if(acid>alk){
+          s.className='summary sum-acid';
+          st.textContent='Predominio acidificante';
+          txt.textContent='Las variables favorecen ↑ H⁺ y tendencia a ↓ pH.';
+        }else if(alk>acid){
+          s.className='summary sum-alk';
+          st.textContent='Predominio alcalinizante';
+          txt.textContent='Las variables favorecen ↓ H⁺ y tendencia a ↑ pH.';
+        }else{
+          s.className='summary sum-warn';
+          st.textContent='Fuerzas opuestas';
+          txt.textContent='Puede existir compensación o un patrón mixto.';
         }
       }
 
-
-      [vent,pco2,hco3,renal].forEach(el => {
-        el.addEventListener('input', updateMixer);
-        el.addEventListener('touchstart', function(e){ e.preventDefault(); }, {passive:false});
-        el.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive:false});
-        el.addEventListener('touchend', function(e){ e.preventDefault(); }, {passive:false});
+      Object.values(tracks).forEach(t=>{
+        positionHandle(t);
+        attachFader(t);
       });
       updateMixer();
-
     </script>
     """
-    components.html(mixer_html, height=560, scrolling=False)
+
+    components.html(mixer_html, height=510, scrolling=False)
 
 with tab3:
     st.subheader("Interpretación guiada de gasometría")
